@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../styles/globalStyles';
+import { handleChatMessage } from '../utils/chatService';
 
 export default function FloatingSupportButton({ onSendMessage }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -43,8 +44,8 @@ export default function FloatingSupportButton({ onSendMessage }) {
 
     try {
       // Call the provided onSendMessage function (this will call your AI/LLM API)
-      const response = await onSendMessage(messageText);
-      
+      const response = await handleChatMessage(messageText);
+
       const aiMessage = {
         id: Date.now() + 1,
         text: response,
