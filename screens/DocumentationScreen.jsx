@@ -101,6 +101,8 @@ export default function DocumentationScreen({ navigation }) {
       if (response.success) {
         // Generate token based on farmer ID
         const token = `farmer-${response.result.id}-${Date.now()}`;
+
+        apiClient.createApplication(response.result.id, state.registrationData.category).then(res => console.log("post app",res))
         
         // Store farmer data and token
         await storage.setFarmerToken(token);

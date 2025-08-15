@@ -1,12 +1,14 @@
 // screens/FarmInfoScreen.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, StyleSheet, Switch } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { globalStyles, COLORS } from '../styles/globalStyles';
 import { useApp } from '../context/AppContext';
+import { apiClient } from '../utils/api';
 
 export default function FarmInfoScreen({ navigation }) {
   const { state, dispatch } = useApp();
+  const [commodityOptions, setCommodityOptions] = useState([]);
   const [formData, setFormData] = useState({
     farmSize: '',
     commodity: '',
@@ -23,13 +25,12 @@ export default function FarmInfoScreen({ navigation }) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const commodityOptions = [
-    { label: 'Please Select', value: '' },
-    { label: 'Vegetables and Fruits', value: 'vegetables_fruits' },
-    { label: 'Maize/Soya/Cotton/Sugar/Grain Products/Other', value: 'grains' },
-    { label: 'Poultry', value: 'poultry' },
-    { label: 'Livestock', value: 'livestock' }
-  ];
+useEffect(()=>{
+    apiClient.getCategories().then(res => {
+    console.log(res.result.items[0]);
+    setCommodityOptions(res.result.items);
+ })
+},[])
 
   const handleNext = () => {
     dispatch({ type: 'UPDATE_REGISTRATION', payload: formData });
@@ -60,14 +61,14 @@ export default function FarmInfoScreen({ navigation }) {
             keyboardType="numeric"
           />
 
-          <Text style={globalStyles.label}>Commodity</Text>
+          <Text style={globalStyles.label}>Categories</Text>
           <View style={[globalStyles.input, { padding: 0 }]}>
             <Picker
-              selectedValue={formData.commodity}
-              onValueChange={(value) => updateField('commodity', value)}
+              selectedValue={formData.category}
+              onValueChange={(value) => updateField('category', value)}
             >
               {commodityOptions.map(option => (
-                <Picker.Item key={option.value} label={option.label} value={option.value} />
+                <Picker.Item key={option.id} label={option.name} value={option.id} />
               ))}
             </Picker>
           </View>

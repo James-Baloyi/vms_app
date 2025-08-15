@@ -1,9 +1,67 @@
 const API_BASE_URL = 'https://vms-api-vms.shesha.app';
-const BEARER_TOKEN = process.env.BEARER_TOKEN;
+const BEARER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiYWRtaW4iLCJBc3BOZXQuSWRlbnRpdHkuU2VjdXJpdHlTdGFtcCI6Ik9BQzJJVlpPN05PWEFVV0c2WlpDNkNCVVBVWVhGV1ZEIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJzdWIiOiIxIiwianRpIjoiMmIyMDQ1ODMtYjdjNC00OTcyLThjY2EtYjA5NmFiNDkyNDMxIiwiaWF0IjoxNzU1MTk4MDAzLCJuYmYiOjE3NTUxOTgwMDMsImV4cCI6MTc1NTYzMDAwMywiaXNzIjoiU2hlc2hhIiwiYXVkIjoiU2hlc2hhIn0.J6UdJgwaWopVuKRftofMHvZpZnOW49iv2KqKPiEjRgI';
 export const apiClient = {
+
+  async getCategories() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/dynamic/sheshapromaxx.vms/Category/Crud/GetAll`, {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${BEARER_TOKEN}`
+        }
+      });
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error?.message || 'Failed to get farmer');
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('API Error - getSix:', error);
+      throw error;
+    }
+  },
+
+  async createApplication(farmerId, category) {
+    console.log("CREATE APP",farmerId, category)
+    try {
+
+      const applicationPayload = {
+        farmer: farmerId,
+        program: "1cb226c2-2d8d-4af7-9a74-adafc5ad7d15",
+        //category: category,
+        status: 0,
+        isFraud: false,
+        startDate: new Date().toISOString(),
+        storedFile: '',
+      };
+
+      const response = await fetch(`${API_BASE_URL}/api/dynamic/sheshapromaxx.vms/Application/Crud/Create`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json-patch+json',
+          'Authorization': `Bearer ${BEARER_TOKEN}`
+        },
+        body: JSON.stringify(applicationPayload),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error?.message || `HTTP ${response.status}: Application failed`);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('API Error - createApplication:', error);
+      throw error;
+    }
+  },
+
   async createFarmer(registrationData) {
     try {
-      // Map registration data to API format exactly as expected
       const farmerPayload = {
         firstName: registrationData.firstName || '',
         lastName: registrationData.lastName || '',
@@ -20,14 +78,12 @@ export const apiClient = {
         saId: registrationData.identityNumber || '', // Same as identityNumber for SA ID
         passportId: registrationData.passportId || '',
         
-        // Functional criteria
         disability: registrationData.disability || false,
         disabilityDescription: registrationData.disabilityDescription || '',
         veteran: registrationData.veteran || false,
         governmentEmployee: registrationData.governmentEmployee || false,
         dweller: registrationData.dweller || false,
         
-        // Farm information
         farmInformation: registrationData.farmInformation || '',
         address: registrationData.address || '',
         workAddress: registrationData.workAddress || '',
@@ -35,21 +91,20 @@ export const apiClient = {
         primaryAccount: registrationData.primaryAccount || '',
         primaryOrganisation: registrationData.primaryOrganisation || '',
         
-        // Additional fields
         title: registrationData.title || 0,
         type: registrationData.type || 0,
         targetingFlag: registrationData.targetingFlag || 0,
         preferredContactMethod: registrationData.preferredContactMethod || 0,
         customShortName: registrationData.customShortName || '',
         photo: registrationData.photo || '',
-        user: registrationData.user || 0,
+        user: registrationData.user || 1,
         
-        // Required by API
+        
         _className: 'Farmer',
         _formFields: registrationData._formFields || [],
         preferredLanguages: registrationData.preferredLanguages || []
       };
-
+      
       console.log('Sending farmer data to API:', JSON.stringify(farmerPayload, null, 2));
 
       const response = await fetch(`${API_BASE_URL}/api/dynamic/sheshapromaxx.vms/Farmer/Crud/Create`, {
@@ -63,7 +118,10 @@ export const apiClient = {
       });
       
       const result = await response.json();
-      console.log('API Response:', result);
+      console.log("RD",registrationData)
+      console.log("RESPONSE",result.id)
+    
+      //console.log('API Response:', result);
       
       if (!response.ok) {
         throw new Error(result.error?.message || `HTTP ${response.status}: Registration failed`);
@@ -73,7 +131,6 @@ export const apiClient = {
     } catch (error) {
       console.error('API Error - createFarmer:', error);
       
-      // FALLBACK ONLY - when API is completely unavailable
       if (error.message.includes('Network request failed') || error.message.includes('fetch')) {
         console.warn('API unavailable, using fallback registration');
         return {
@@ -100,6 +157,7 @@ export const apiClient = {
         }
       });
       const result = await response.json();
+      console.log("API RESULT::",result)
       
       if (!response.ok) {
         throw new Error(result.error?.message || 'Failed to get farmer');
@@ -141,19 +199,17 @@ export const apiClient = {
     }
   },
 
-  // Voucher API calls - using the same base URL pattern
   async getVouchers(farmerId) {
+    console.log(farmerId)
     try {
-      // Since voucher endpoints aren't in the swagger, we'll try the likely pattern
-      const response = await fetch(`${API_BASE_URL}/api/dynamic/sheshapromaxx.vms/Voucher/Crud/GetAll?filter=farmerId eq ${farmerId}`, {
+
+      const response = await fetch(`${API_BASE_URL}/api/dynamic/sheshapromaxx.vms/Voucher/Crud/GetAll`, {
         headers: {
           'accept': 'application/json',
           'Authorization': `Bearer ${BEARER_TOKEN}`
         }
       });
-      
       if (!response.ok) {
-        // If voucher API doesn't exist yet, return empty array
         console.log('Voucher API not available, returning empty array');
         return { success: true, result: { items: [], totalCount: 0 } };
       }
@@ -169,7 +225,6 @@ export const apiClient = {
 
   async getOrders(farmerId) {
     try {
-      // Since order endpoints aren't in the swagger, we'll try the likely pattern
       const response = await fetch(`${API_BASE_URL}/api/dynamic/sheshapromaxx.vms/Order/Crud/GetAll?filter=farmerId eq ${farmerId}`, {
         headers: {
           'accept': 'application/json',
@@ -178,7 +233,6 @@ export const apiClient = {
       });
       
       if (!response.ok) {
-        // If order API doesn't exist yet, return empty array
         console.log('Order API not available, returning empty array');
         return { success: true, result: { items: [], totalCount: 0 } };
       }
@@ -187,7 +241,6 @@ export const apiClient = {
       return result;
     } catch (error) {
       console.log('Order API error, returning empty array:', error.message);
-      // Return empty orders instead of failing
       return { success: true, result: { items: [], totalCount: 0 } };
     }
   },
