@@ -48,13 +48,13 @@ export default function VouchersScreen() {
   };
 
   const getStatusColor = (status) => {
-    switch (status?.toUpperCase()) {
-      case 'ACTIVE': return COLORS.success;
-      case 'AWAITING VERIFICATION': return '#FF9800';
-      case 'PENDING': return '#FF9800';
-      case 'EXPIRING SOON': return COLORS.error;
-      case 'EXPIRED': return COLORS.textLight;
-      case 'USED': return COLORS.textLight;
+    switch (status) {
+      case 'active': return COLORS.success;
+      case 'awaiting_verification': return '#FF9800';
+      case 'pending': return '#FF9800';
+      case 'expiring soon': return COLORS.error;
+      case 'expired': return COLORS.textLight;
+      case 'used': return COLORS.textLight;
       default: return COLORS.textLight;
     }
   };
@@ -74,14 +74,14 @@ export default function VouchersScreen() {
   };
 
   const getVoucherSummary = () => {
-    const active = vouchers.filter(v => v.status?.toUpperCase() === 'ACTIVE').length;
-    const pending = vouchers.filter(v => v.status?.toUpperCase() === 'PENDING' || v.status?.toUpperCase() === 'AWAITING VERIFICATION').length;
+    const active = vouchers.filter(v => v?.status === 'active').length;
+    const pending = vouchers.filter(v => v?.status === 'pending' || v?.status === 'awaiting verification').length;
     const expiring = vouchers.filter(v => {
       if (!v.expiryDate) return false;
       const expiryDate = new Date(v.expiryDate);
       const thirtyDaysFromNow = new Date();
       thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-      return expiryDate <= thirtyDaysFromNow && v.status?.toUpperCase() === 'ACTIVE';
+      return expiryDate <= thirtyDaysFromNow && v?.status === 'active';
     }).length;
 
     return { active, pending, expiring };
@@ -178,7 +178,7 @@ export default function VouchersScreen() {
                   )}
                 </View>
 
-                {(voucher.status?.toUpperCase() === 'ACTIVE') && (
+                {(voucher?.status === 'active') && (
                   <TouchableOpacity style={[globalStyles.button, styles.useButton]}>
                     <Text style={globalStyles.buttonText}>Use Voucher</Text>
                   </TouchableOpacity>

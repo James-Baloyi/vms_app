@@ -3,6 +3,7 @@ import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StyleSheet, Ale
 import { globalStyles, COLORS } from '../styles/globalStyles';
 import { storage } from '../utils/storage';
 import { apiClient } from '../utils/api';
+import { getDateOfBirthFromSAID } from '../utils/dob';
 
 export default function ProfileScreen({ navigation }) {
   const [farmerData, setFarmerData] = useState(null);
@@ -153,7 +154,7 @@ export default function ProfileScreen({ navigation }) {
           
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Date of Birth</Text>
-            <Text style={styles.detailValue}>{formatDate(farmerData.dateOfBirth)}</Text>
+            <Text style={styles.detailValue}>~{formatDate(getDateOfBirthFromSAID(farmerData.identityNumber))}</Text>
           </View>
           
           <View style={styles.detailRow}>
