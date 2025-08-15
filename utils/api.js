@@ -104,7 +104,7 @@ export const apiClient = {
         preferredLanguages: registrationData.preferredLanguages || []
       };
       
-      console.log('Sending farmer data to API:', JSON.stringify(farmerPayload, null, 2));
+      // console.log('Sending farmer data to API:', JSON.stringify(farmerPayload, null, 2));
 
       const response = await fetch(`${API_BASE_URL}/api/dynamic/sheshapromaxx.vms/Farmer/Crud/Create`, {
         method: 'POST',
@@ -117,8 +117,6 @@ export const apiClient = {
       });
       
       const result = await response.json();
-      console.log("RD",registrationData)
-      console.log("RESPONSE",result.id)
     
       //console.log('API Response:', result);
       

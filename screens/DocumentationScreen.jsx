@@ -5,6 +5,11 @@ import { globalStyles, COLORS } from '../styles/globalStyles';
 import { useApp } from '../context/AppContext';
 import { apiClient } from '../utils/api';
 import { storage } from '../utils/storage';
+import { handleApplication } from '../utils/applicationService';
+
+const API_BASE_URL = 'https://vms-api-vms.shesha.app';
+const BEARER_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiYWRtaW4iLCJBc3BOZXQuSWRlbnRpdHkuU2VjdXJpdHlTdGFtcCI6Ik9BQzJJVlpPN05PWEFVV0c2WlpDNkNCVVBVWVhGV1ZEIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJzdWIiOiIxIiwianRpIjoiMmIyMDQ1ODMtYjdjNC00OTcyLThjY2EtYjA5NmFiNDkyNDMxIiwiaWF0IjoxNzU1MTk4MDAzLCJuYmYiOjE3NTUxOTgwMDMsImV4cCI6MTc1NTYzMDAwMywiaXNzIjoiU2hlc2hhIiwiYXVkIjoiU2hlc2hhIn0.J6UdJgwaWopVuKRftofMHvZpZnOW49iv2KqKPiEjRgI';
+
 
 export default function DocumentationScreen({ navigation }) {
   const { state, dispatch } = useApp();
@@ -99,18 +104,58 @@ export default function DocumentationScreen({ navigation }) {
       const response = await apiClient.createFarmer(farmerData);
 
       if (response.success) {
+        let respId;
         // Generate token based on farmer ID
         const token = `farmer-${response.result.id}-${Date.now()}`;
 
-        apiClient.createApplication(response.result.id, state.registrationData.category).then(res => console.log("post app",res))
+        apiClient.createApplication(response.result.id, state.registrationData.category).then(res => {
+
+     respId = res.result.id
+
+        })
+
+
         
         // Store farmer data and token
         await storage.setFarmerToken(token);
         await storage.setFarmerData(response.result);
-        
+
+        // check application status
+        const applicationStatus = await handleApplication(farmerData)
+
+
+       const match = applicationStatus.match(/\{[\s\S]*\}/);
+       let result;
+        if (match) {
+          const jsonText = match[0];
+          result = JSON.parse(jsonText);
+          console.log(result.decision);
+        }
+
+        // Update application status
+        const appRes = await updateAplicationStatus(result.decision, respId)
+
+        console.log("APPLICATION STATUS", appRes);
+
         // Update context
         dispatch({ type: 'SET_FARMER', payload: response.result });
-        
+
+         if (result.decision === 'REJECT') {
+        Alert.alert(
+          'Registration Successful!', 
+          'But your application was rejected due to: ' + result.reasons.join(', '),
+          [{ text: 'Continue', onPress: () => {
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'Main' }],
+            });
+          }}]
+        );
+
+
+        }else
+          {
+          
         Alert.alert(
           'Registration Successful!', 
           'Welcome to the Farmer Portal. You can now access your dashboard.',
@@ -121,6 +166,7 @@ export default function DocumentationScreen({ navigation }) {
             });
           }}]
         );
+      }
       } else {
         throw new Error('Registration failed');
       }
@@ -134,6 +180,39 @@ export default function DocumentationScreen({ navigation }) {
       setIsSubmitting(false);
     }
   };
+
+  const updateAplicationStatus = async (status, id) => {
+
+      try {
+
+        const applicationPayload = {
+          id: id,
+          status: status === 'ACCEPT' ? 4 : 5, // Assuming 1 is accepted and 2 is rejected
+        }
+
+      const response = await fetch(`${API_BASE_URL}/api/dynamic/sheshapromaxx.vms/Application/Crud/Update`, {
+        method: 'PUT',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${BEARER_TOKEN}`,
+          'Content-Type': 'application/json-patch+json',    
+        },
+        body: JSON.stringify(applicationPayload),
+      });
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error?.message || 'Failed update application status');
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('API Error - getSix:', error);
+      throw error;
+    }
+
+  }
+
 
   return (
     <SafeAreaView style={globalStyles.container}>
