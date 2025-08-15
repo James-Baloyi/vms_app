@@ -30,7 +30,6 @@ export const apiClient = {
       const applicationPayload = {
         farmer: farmerId,
         program: "1cb226c2-2d8d-4af7-9a74-adafc5ad7d15",
-        //category: category,
         status: 0,
         isFraud: false,
         startDate: new Date().toISOString(),

@@ -38,7 +38,7 @@ useEffect(()=>{
   };
 
   const canProceed = () => {
-    return formData.farmSize && formData.commodity && formData.productionSize;
+    return formData.farmSize && formData.category && formData.productionSize;
   };
 
   return (
