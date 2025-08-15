@@ -113,7 +113,6 @@ function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!isRegistered ? (
-          // Registration flow
           <>
             <Stack.Screen name="Landing" component={LandingScreen} />
             <Stack.Screen name="FarmerInfo" component={FarmerInfoScreen} />
@@ -122,7 +121,6 @@ function AppNavigator() {
             <Stack.Screen name="Documentation" component={DocumentationScreen} />
           </>
         ) : (
-          // Main app
           <Stack.Screen name="Main" component={MainTabs} />
         )}
       </Stack.Navigator>
