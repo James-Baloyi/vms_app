@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import { globalStyles, COLORS } from '../styles/globalStyles';
 import { storage } from '../utils/storage';
+import FloatingSupportButton from '../components/FloatingSupportButton';
 
 export default function OrdersScreen() {
   const [orders, setOrders] = useState([]);
@@ -117,6 +118,7 @@ export default function OrdersScreen() {
           </View>
         )}
       </ScrollView>
+    <FloatingSupportButton onSendMessage={()=>{console.log("MESSAGE")}}/>
     </SafeAreaView>
   );
 }

@@ -46,7 +46,7 @@ export default function ProfileScreen({ navigation }) {
   const handleLogout = () => {
     Alert.alert(
       'Logout',
-      'Are you sure you want to logout?',
+      "You're going to have to register again if you logout",
       [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Logout', style: 'destructive', onPress: logout }
@@ -54,9 +54,19 @@ export default function ProfileScreen({ navigation }) {
     );
   };
 
+  const superSure = () => {
+        Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', style: 'destructive', onPress: superSure }
+      ]
+    );
+  }
+
   const logout = async () => {
     await storage.clearAll();
-    // Reset navigation to registration flow
     navigation.reset({
       index: 0,
       routes: [{ name: 'Landing' }],
@@ -203,9 +213,7 @@ export default function ProfileScreen({ navigation }) {
         </View>
 
         <View style={styles.actions}>
-          <TouchableOpacity style={[globalStyles.button, globalStyles.buttonSecondary]}>
-            <Text style={globalStyles.buttonSecondaryText}>Edit Profile</Text>
-          </TouchableOpacity>
+
           
           <TouchableOpacity style={[globalStyles.button, styles.logoutButton]} onPress={handleLogout}>
             <Text style={styles.logoutButtonText}>Logout</Text>
